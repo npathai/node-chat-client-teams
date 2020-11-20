@@ -1,0 +1,276 @@
+/** Common styles **/
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+body {
+    font-size: 14px;
+    font-family: "Segoe UI",system-ui,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+    color: #252423
+}
+
+.user-avatar {
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+}
+
+#header-strip {
+    background-color: #464775;
+    height: 3.5rem;
+    width: 100%;
+    display: flex;
+}
+
+/*#logged-in-user-user-avatar-container {*/
+/*    right: 0;*/
+/*    margin-top: 0.5vh;*/
+/*    margin-right: 1.5vh;*/
+/*}*/
+
+#conversations {
+    overflow-y: scroll;
+}
+
+.conversation {
+    padding: 0.5vw;
+}
+
+.conversation .user-avatar {
+    margin: 0.5rem;
+}
+
+.conversation-content {
+    margin-top: 0.5rem;
+}
+
+.active-conversation {
+    background-color: #edebe9;
+}
+
+.conversation-content-sender {
+    font-weight: bold;
+}
+
+#current-conversation-container {
+    background-color: #f3f2f1;
+}
+#conversation-header {
+    height: 4rem;
+    background-color: #f3f2f1;
+    border-bottom: 1px solid silver;
+    box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.2);
+}
+
+#conversation-header .user-avatar {
+    margin: 1rem;
+}
+
+#current-conversation-title {
+    font-size: 17px;
+    font-weight: bold;
+}
+
+#conversation-messages {
+    display: block;
+    margin-top: 1rem;
+    flex-direction: column;
+    overflow-y: scroll ;
+}
+
+.conversation-message {
+    font-size: 16px;
+    margin-top: 0.2rem;
+    border-radius: 0.2rem;
+    max-width: 60%;
+    display: grid;
+    padding: 5px 10px;
+}
+
+.incoming-message {
+    background-color: #ffffff;
+}
+
+.incoming-message-container {
+    display: grid;
+    justify-items: left;
+    margin-left: 10vh;
+}
+
+.outgoing-message-container {
+    display: grid;
+    justify-items: end;
+    margin-right: 10vh;
+    grid-template-columns: 99% 1%;
+}
+
+.outgoing-message {
+    background-color: #e5e5f1;
+    justify-items: end;
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column-reverse;
+    margin-left: auto;
+    padding-left: 0.25rem;
+}
+
+.status-container > i {
+    color: #6264a7;
+}
+
+/** Flex styling **/
+
+#main-content {
+    display: flex;
+    height: calc(100vh - 3.5rem);
+}
+
+#conversations {
+    flex-basis: 25rem;
+}
+
+#current-conversation-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    flex: 1;
+}
+
+.flex-fill {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    /**
+    This allows add new message box to show up, else it pushes that div outside of view
+     */
+    min-height: 0;
+}
+
+#add-new-message {
+    margin: 1.8rem 0 2.5rem;
+    align-items: stretch;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.conversation {
+    display: flex;
+}
+
+.conversation-content {
+    flex: 1;
+}
+
+#conversation-header {
+    display: flex;
+    align-items: center;
+}
+
+#header-strip {
+    align-items: center;
+    justify-content: space-between;
+}
+
+#left-empty {
+    flex: 1;
+}
+
+#search-box {
+    flex:2;
+    line-height: 1.5rem;
+}
+
+#search-input {
+    width: 100%;
+    border-radius: 0.3rem;
+    padding-left: 1rem;
+    line-height: inherit;
+    font-size: 14px;
+}
+
+#search-input:focus {
+    background-color: #ffffff;
+    outline: none;
+}
+
+#logged-in-user-user-avatar-container {
+    flex: 1;
+    display: flex;
+}
+
+#logged-in-user-user-avatar-container .user-avatar {
+    margin-left: auto;
+    margin-right: 1rem;
+}
+
+#logged-in-user-avatar-left-empty {
+    flex: 3
+}
+
+#logged-in-user-avatar {
+    display: flex;
+}
+
+#outer-shell {
+    height: 100%;
+    overflow: hidden;
+}
+
+#compose-message-container {
+}
+
+#compose-controls-container {
+    display: grid;
+    justify-items: end;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+#compose-box-container {
+    display: grid;
+    max-width: 45rem;
+    margin: auto;
+    grid-template-columns: 97% 3%;
+}
+
+#compose-box {
+    background-color: #edebe9;
+    border-radius: 0.3rem;
+    padding: 0.3rem 1rem;
+    line-height: 32px;
+    font-size: 14px;
+    border: none;
+    border-bottom-color: #6264a7;
+    outline: none;
+}
+
+/**
+Style for scrollbar
+ */
+::-webkit-scrollbar {
+    width: 9px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
