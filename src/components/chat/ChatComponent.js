@@ -9,6 +9,7 @@ import {
 import Select from "react-select";
 
 import './ChatComponent.css'
+import newConversation from './new_conversation.svg'
 
 class ChatComponent extends React.Component {
 
@@ -30,6 +31,7 @@ class ChatComponent extends React.Component {
         this.sendMessage = this.sendMessage.bind(this);
         this.connectSocket = this.connectSocket.bind(this);
         this.handleUserSelected = this.handleUserSelected.bind(this)
+        this.createConversation = this.createConversation.bind(this);
     }
 
     componentDidMount() {
@@ -61,13 +63,45 @@ class ChatComponent extends React.Component {
             socket.onmessage = (event) => {
                 console.log("Received back at client: '" + event.data + "'");
                 let messagePayload = JSON.parse(event.data)
-                this.state.conversationsById[messagePayload.conversationId].messages.push(messagePayload.message)
-                this.setState({
+                let conversation = this.state.conversationsById[messagePayload.conversationId]
+                // Check if it is a new conversation
+                if (conversation === undefined) {
+                    // If may be possible that user was offline for a while and just came online to receive new message. So be sure and fetch full conversation
+                    // Can we improve on this by managing connected/disconnected state in front end. And when we reconnect, we refresh full state, only then bind
+                    // the websocket?
+                    this.getConversationById(messagePayload.conversationId).then(conversation => {
+                        let conversations = this.state.conversationsById
+                        conversations[conversation._id] = conversation
+                        this.setState({
+                            conversationsById: conversations
+                        })
+                        // scrollToBottom()
+                    })
+                } else {
+                    this.state.conversationsById[messagePayload.conversationId].messages.push(messagePayload.message)
+                    this.setState({
 
-                })
-                // scrollToBottom()
+                    })
+                    // scrollToBottom()
+                }
             }
         }
+    }
+
+    getConversationById(conversationId) {
+        return fetch(`http://localhost:3000/api/conversations/${conversationId}`, {
+            cors: true,
+            method: "get",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        }).then(res => {
+            if (res.status !== 200) {
+                throw new Error("Error in fetching conversation")
+            }
+            return res.json();
+        })
     }
 
     disconnectSocket() {
@@ -140,6 +174,12 @@ class ChatComponent extends React.Component {
     }
 
     latestConversationMessage(conversation) {
+        if (conversation._id === "draft") {
+            return "(Draft)"
+        }
+        if (conversation.messages.length === 0) {
+            return null;
+        }
         return conversation.messages[conversation.messages.length - 1].message
     }
 
@@ -161,6 +201,55 @@ class ChatComponent extends React.Component {
 
     sendMessage(event) {
         event.preventDefault()
+        if (this.state.currentConversation._id === "draft") {
+            this.createConversation().then(() => {
+                this.postMessage();
+                this.setState({
+                    composedMessage: ''
+                })
+            })
+        } else {
+            this.postMessage();
+            this.setState({
+                composedMessage: ''
+            })
+        }
+    }
+
+    createConversation() {
+        return fetch("http://localhost:3000/api/conversations", {
+            cors: true,
+            method: "post",
+            body: JSON.stringify({
+                members: this.state.conversationsById['draft'].members
+            }),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        }).then(res => {
+            if (res.status !== 200) {
+                throw new Error("Unable to create conversation")
+            }
+            return res.json()
+        }).then(conversation => {
+            let newConversations = this.state.conversationsById
+            delete newConversations['draft']
+            newConversations[conversation._id] = conversation;
+            let currentConversation = this.state.currentConversation
+            if (currentConversation._id === "draft") {
+                currentConversation = conversation
+            }
+            this.setState({
+                conversationsById: newConversations,
+                currentConversation: currentConversation
+            })
+        }).catch(err => {
+            console.log(err)
+        })
+    }
+
+    postMessage() {
         fetch(`http://localhost:3000/api/conversations/${this.state.currentConversation._id}/message`, {
             cors: true,
             method: 'post',
@@ -179,15 +268,10 @@ class ChatComponent extends React.Component {
         }).then(res => {
             // FIXME need proper solution for this updation of map in state
             this.state.conversationsById[res.conversationId].messages.push(res.message)
-            this.setState({
-
-            })
+            this.setState({})
             console.log(res)
         }).catch(err => {
             console.log(err);
-        })
-        this.setState({
-            composedMessage: ''
         })
     }
 
@@ -205,9 +289,26 @@ class ChatComponent extends React.Component {
                 break
             }
         }
+        if (existingConversation === undefined) {
+            existingConversation = {
+                _id: "draft", // Because this is a draft conversation
+                members: [this.props.loggedInUsername, selectedUser.value],
+                messages: [],
+                isDraft: true
+            }
+            // FIXME need to find how to update map in react state.
+            // Currently there can only be one chat in draft. Can we change this?
+            let conversations = this.state.conversationsById
+            conversations[existingConversation._id] = existingConversation
+            this.setState({
+                currentConversation: existingConversation,
+                conversationsById: conversations
+            })
+        }
     }
 
     render() {
+        console.log(this.state);
         const options = []
         this.state.users.forEach((user, index, arr) => {
             options.push({
@@ -259,7 +360,7 @@ class ChatComponent extends React.Component {
 
                     {Object.keys(this.state.conversationsById).map((conversationId, id, arr) => (
 
-                        <div className="conversation" id={conversationId}
+                        <div className={this.state.currentConversation !== undefined && this.state.currentConversation._id === conversationId ? "conversation active-conversation" : "conversation"} id={conversationId}
                              onClick={() => this.setCurrentConversation(conversationId)}>
                             <img
                                 src='https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Round&hairColor=PastelPink&facialHairType=BeardMagestic&facialHairColor=Auburn&clotheType=ShirtScoopNeck&clotheColor=Heather&eyeType=Happy&eyebrowType=Default&mouthType=Sad&skinColor=Pale'
@@ -315,7 +416,7 @@ class ChatComponent extends React.Component {
                     <div className="flex-fill">
                         {!this.state.conversationsLoaded
                             ? <span>Loading conversations...</span>
-                            : <>
+                            : this.state.currentConversation !== undefined ? <>
                                 <div id="conversation-header">
                                     <img
                                         src='https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Round&hairColor=PastelPink&facialHairType=BeardMagestic&facialHairColor=Auburn&clotheType=ShirtScoopNeck&clotheColor=Heather&eyeType=Happy&eyebrowType=Default&mouthType=Sad&skinColor=Pale'
@@ -326,7 +427,7 @@ class ChatComponent extends React.Component {
 
                                 <div id="conversation-messages">
 
-                                    {this.state.currentConversation.messages.map((message, index, arr) => {
+                                    {this.state.currentConversation._id !== "draft" ? this.state.currentConversation.messages.map((message, index, arr) => {
                                         return <>
                                             <div className={this.isMessageFromMe(message) ? "outgoing-message-container" : "incoming-message-container"}>
                                                 <div className={this.isMessageFromMe(message) ? "conversation-message outgoing-message" : "conversation-message incoming-message"}>
@@ -340,9 +441,9 @@ class ChatComponent extends React.Component {
                                                 }
                                             </div>
                                         </>
-                                    })}
+                                    }): <div id="new-conversation-illustration"><img src={newConversation}  alt="new-conversation"/><div><span id="new-conversation-heading">You are starting a new conversation</span></div></div>}
                                 </div>
-                            </>}
+                            </>: <span>Start by having a conversation with any team member.</span>}
                     </div>
                     <div id="add-new-message">
                         <div id="compose-message-container">

@@ -271,6 +271,22 @@ body {
     display: inherit;
 }
 
+#new-conversation-illustration {
+    display: grid;
+    justify-content: center;
+    margin-top: 5rem;
+}
+
+#new-conversation-illustration > img {
+    max-width: 33rem;
+    max-height: 33rem;
+}
+
+#new-conversation-heading {
+    font-weight: bold;
+    font-size: 17px;
+}
+
 /**
 Style for scrollbar
  */
