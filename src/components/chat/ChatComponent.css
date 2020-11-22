@@ -43,6 +43,11 @@ body {
 
 .conversation {
     padding: 0.5vw;
+    cursor: pointer;
+}
+
+.conversation:hover {
+    background-color: rgba(229,229,241, 0.6);
 }
 
 .conversation .user-avatar {
@@ -240,6 +245,10 @@ body {
     margin-left: 1rem;
 }
 
+#compose-controls-container > svg {
+    cursor: pointer;
+}
+
 #compose-box-container {
     display: grid;
     max-width: 45rem;
@@ -256,6 +265,10 @@ body {
     border: none;
     border-bottom-color: #6264a7;
     outline: none;
+}
+
+#compose-form {
+    display: inherit;
 }
 
 /**
