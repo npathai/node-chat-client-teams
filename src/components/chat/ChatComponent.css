@@ -108,13 +108,13 @@ body {
 .incoming-message-container {
     display: grid;
     justify-items: left;
-    margin-left: 10vh;
+    margin-left: 20vh;
 }
 
 .outgoing-message-container {
     display: grid;
     justify-items: end;
-    margin-right: 10vh;
+    margin-right: 20vh;
     grid-template-columns: 99% 1%;
 }
 
